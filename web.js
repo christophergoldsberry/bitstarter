@@ -1,4 +1,3 @@
-
 express = require('express');
 var fs = require('fs');
 
@@ -6,7 +5,8 @@ var app = express.createServer(express.logger());
 
 app.get('/', function(request, response) {
     indexBuffer = fs.readFileSync('index.html');
-    response.send(indexBuffer.toString);
+    stringMessage = indexBuffer.toString;
+    response.send(stringMessage);
 });
 
 var port = process.env.PORT || 5000;
