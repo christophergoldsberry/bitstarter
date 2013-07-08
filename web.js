@@ -5,7 +5,7 @@ var app = express.createServer(express.logger());
 
 app.get('/', function(request, response) {
     indexBuffer = new Buffer(fs.readFileSync('index.html'));
-    stringMessage = indexBuffer.toString;
+    stringMessage = indexBuffer.toString();
     response.send(stringMessage);
 });
 
