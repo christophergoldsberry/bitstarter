@@ -26,7 +26,7 @@ var sys = require('util');
 var HTMLFILE_DEFAULT = "index.html";
 var CHECKSFILE_DEFAULT = "checks.json";
 var URLFILE_DEFAULT = 'http://obscure-reef-2770.herokuapp.com';
-var targetFileName = "test.html";
+var targetFileName = 'test.html';
 
 var assertFileExists = function(infile) {
     var instr = infile.toString();
@@ -38,17 +38,17 @@ var assertFileExists = function(infile) {
 };
 
 var assertUrlExists = function(infile) {
-    var instr = infile.toString();
-    rest.get(instr).on('complete', function(result) {
+    rest.get(infile).on('complete', function(result) {
 	if (result instanceof Error) {
 	    console.log('Error: ' + result.message);
 	    process.exit(1);
 	} else {
-	    //return sys.puts(result);
-	    return instr;
+	    
 	}
     });
 };
+
+
 
 
 var cheerioHtmlFile = function(htmlfile) {
@@ -88,22 +88,31 @@ var clone = function(fn) {
 }*/
 
 var writeURLToFile = function(url, fileName) {
-    var response2console = function(result, response) {
-        if (result instanceof Error) {
+    console.log("writingURLToFile");
+    rest.get(url).on('complete',function(result, response) {
+        console.log('successfully downloaded file.');
+	if (result instanceof Error) {
             console.error('Error: ' + util.format(response.message));
         } else {
-            console.error("Wrote %s", csvfile);
+            console.error("Wrote %s", fileName);
             fs.writeFileSync(fileName, result);
+	    var checkJson = checkHtmlFile(fileName, CHECKSFILE_DEFAULT);
+	    var outJson = JSON.stringify(checkJson, null, 4);
+	    console.log(outJson);
+	    fs.writeFileSync("jsonFile.txt", outJson);
+	    console.log("complete!");
         }
-    };
-    return response2console;
+     });
+    console.log('exited REST call');
 };
 
 var checkAndParse = function(url, fileName, checkFile) {
-    var parsedFile = writeURLToFile(url, fileName);
-    var checkJson = checkHtmlFile(parsedFile, checkFile);
-    var outJson = JSON.stringify(checkJson, null, 4);
-    console.log(outJson);
+    console.log('starting check and parse');
+    var stringUrl = url.toString();
+    var parsedFile = writeURLToFile(stringUrl, fileName);
+//    var checkJson = checkHtmlFile(parsedFile, checkFile);
+//    var outJson = JSON.stringify(checkJson, null, 4);
+//    console.log(outJson);
 }
 
 
@@ -114,12 +123,13 @@ if(require.main == module) {
     program
         .option('-c, --checks <check_file>', 'Path to checks.json', clone(assertFileExists), CHECKSFILE_DEFAULT)
         .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
-        .option('-u, --url <url_file>', 'Path to external url', clone(assertUrlExists), URLFILE_DEFAULT)
+        .option('-u, --url <url_file>', 'Path to external url')// clone(assertUrlExists), URLFILE_DEFAULT)
 	.parse(process.argv);
-    if(program.url != undefined){
+    if(program.url != null){
 	var parsedData = checkAndParse(program.url, targetFileName, program.checks);
 	return parsedData;
 	} else{
+	    console.log("I'm not using the URL check!");
 	    var checkJson = checkHtmlFile(program.file, program.checks);
 	    var outJson = JSON.stringify(checkJson, null, 4);
 	    console.log(outJson);
